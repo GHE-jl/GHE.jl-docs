@@ -1,4 +1,4 @@
-# GeothermalJL Documentation
+# GHE.jl Documentation
 
 Central documentation hub for the GeothermalJL ecosystem — a collection of Julia packages
 for geothermal simulation, ground heat exchanger design, and ground source heat pump analysis.
