@@ -2,7 +2,7 @@
 
 This page describes the role of a ground thermal response function, the conventions every model in
 the package shares, and the high-level `ground_response` interface that dispatches over
-model type and field size. The subsequent theory pages derive each model in turn.
+model type and field size.
 
 ## The ground response function
 
@@ -12,21 +12,13 @@ transient: for a constant heat extraction/injection rate ``q`` [W/m] applied fro
 temperature rise at a radius ``r`` from the source is
 
 ```math
-\Delta T(r, t) = q\, g(r, t).
+\Delta T(r, t) = q \cdot g(r, t).
 ```
 
 The single-borehole model functions return ``g`` in units of **°C·m/W**, with the
 ground-conductivity normalisation (the ``1/(4\pi k_s)`` exponential-integral prefactor and its
 analogues) already folded into the returned value — so no extra scaling is needed to obtain a
 temperature from a load. A constant unit impulse of 1 W/m therefore yields ``\Delta T = g``.
-
-Each model is the solution of the transient heat-conduction equation for a particular idealisation
-of the heat source:
-
-- a **line** of infinite length (ILS),
-- a hollow **cylinder** of finite radius (ICS),
-- a **line of finite length** that accounts for the ground surface and the borehole bottom (FLS),
-- and the two **moving** variants (MILS, MFLS) that add groundwater advection.
 
 ## What each model adds
 
@@ -61,36 +53,49 @@ borefield g-array.
 | `Real` | `AbstractMatrix` (`nb×nb`) | `nb × nb` matrix | borefield, one time |
 | `AbstractVector` | `AbstractMatrix` (`nb×nb`) | `nt × nb × nb` array | full borefield g-array |
 
-The `nb×nb` pairwise-radius matrix is produced by `borefield_radius`.
+The `nb×nb` pairwise-distance matrix is produced by `borefield_geometry`.
 
-### Moving models — directional coordinates `xy`
+### Moving models — distance `r` and flow-relative angle `θ`
 
-Because groundwater flow breaks radial symmetry, `mils` and `mfls` take Cartesian
-coordinates instead of a radius (flow is along the positive ``x``-axis):
+Because groundwater flow breaks radial symmetry, `mils` and `mfls` take a second
+geometry argument: the angle ``\theta`` (in **degrees**, ``\theta \in [0, 180]``) of the
+source→receiver direction relative to the flow (``+x``). Downstream is ``\theta = 0`` (warmest),
+upstream ``\theta = 180`` (coolest):
 
-| `t` | `xy` | Output | Meaning |
+| `t` | `r`, `θ` | Output | Meaning |
 |---|---|---|---|
-| `Real` | `AbstractVector` (`[x, y]`) | scalar | one time, one point |
-| `AbstractVector` | `AbstractVector` (`[x, y]`) | `nt`-vector | time series at one point |
-| `Real` | `AbstractMatrix` (`nb×2`) | `nb × nb` matrix | borefield, one time |
-| `AbstractVector` | `AbstractMatrix` (`nb×2`) | `nt × nb × nb` array | full borefield g-array |
+| `Real` | `Real`, `Real` | scalar | one time, one point |
+| `AbstractVector` | `Real`, `Real` | `nt`-vector | time series at one point |
+| `Real` | `AbstractMatrix`, `AbstractMatrix` (`nb×nb`) | `nb × nb` matrix | borefield, one time |
+| `AbstractVector` | `AbstractMatrix`, `AbstractMatrix` (`nb×nb`) | `nt × nb × nb` array | full borefield g-array |
 
-For the matrix overloads the kernel internally forms pairwise displacements; the diagonal
-(self-response) uses ``[0, 0]``, which triggers the inside-borehole branch.
+The `r` and `θ` matrices come from `borefield_geometry`. Its diagonal self entry
+``(r_b, 0)`` flows through the kernel like any other pair and yields the borehole-wall self response,
+so the diagonal is not special-cased.
 
 ## The high-level interface
 
 `ground_response` is the single entry point. It dispatches on the ground-model type and on
 the number of boreholes:
 
-- **Single borehole** (`size(xy, 1) == 1`): evaluates the model kernel directly at the borehole
-  wall radius `rb`.
-- **Multiple boreholes**: applies spatial superposition via `successive_flux`.
+- **Single borehole** (`size(xy, 1) == 1`): evaluates the model kernel at the borehole wall radius
+  `rb`.
+- **Multiple boreholes**: applies spatial superposition via `successive_flux` (BC-II). \TODO or any other spatial superposition. Modify this to include the variety of methods. In fact, this section is unclear. The `bc` are defined after. Reorganize this so that it is more linear.
+- **`FLSModel` with `nseg > 1`** (a field): applies the BC-III segment superposition, defaulting to
+  the time-marching solver `segment_response_marching` (the block `segment_response`
+  is reachable with `solver = :block`). A single borehole always evaluates the whole-borehole FLS
+  kernel directly, regardless of `nseg`. See Spatial superposition for the boundary-condition
+  hierarchy (BC-I → BC-II → BC-III).
+
+The `bc` and `solver` keywords override these defaults (`bc = :I | :II | :III`, `solver` picking the
+backend), and `interp` (default `true`) controls the internal constant-step sub-sampling, a correctness requirement for the temporal solvers on non-uniform `t`, a performance option elsewhere.
+See Spatial superposition.
 
 ```julia
 m = FLSModel(150.0, 4.0, 3.0, 2.0e6)
 g_single = ground_response(t, rb, [0.0 0.0], m)        # single borehole
-g_field  = ground_response(t, rb, borefield(:rectangle, 3, 3, 5.0), m)  # borefield
+g_field = ground_response(t, rb, borefield(:rectangle, 3, 3, 5.0), m)  # borefield (BC-II)
+g_bc3 = ground_response(t, rb, borefield(:rectangle, 3, 3, 5.0), FLSModel(150.0, 4.0, 3.0, 2.0e6, 8))  # BC-III
 ```
 
 This keeps user code independent of which model is used: swapping `FLSModel` for `MFLSModel`
@@ -98,9 +103,10 @@ changes only the model object, not the call.
 
 ## Extending with custom models
 
-`AbstractGroundModel` is the extension point. Subtype it and add
-`successive_flux` / `bloc_matrix` overloads to make a new model usable everywhere
-`ground_response` is:
+`AbstractGroundModel` is the extension point (in model.response.jl \TODO add the link). Subtype it and add a single `_borehole_response` method
+returning the pairwise `nt × nb × nb` response array, every backend (`uniform_flux`,
+`successive_flux`, `bloc_matrix`, `segment_response`) and the `ground_response` interface (including
+`interp` sub-sampling) then work with no further overloads:
 
 ```julia
 struct MyModel <: AbstractGroundModel
@@ -108,10 +114,15 @@ struct MyModel <: AbstractGroundModel
     Cs::Float64
 end
 
-function GroundResponse.successive_flux(t, rb, xy, m::MyModel)
-    r, = borefield_radius(xy, rb)
-    return successive_flux(my_gfunc(t, r, m.ks, m.Cs))
+function GroundResponse._borehole_response(t, rb, xy, m::MyModel)
+    r = borefield_geometry(xy, rb)[1]          # nb×nb distance matrix
+    return my_gfunc(t, r, m.ks, m.Cs)          # nt × nb × nb
 end
 ```
 
+## Functions on this page
 
+```@docs
+AbstractGroundModel
+ground_response
+```

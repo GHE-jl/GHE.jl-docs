@@ -15,9 +15,9 @@ is the hydraulic diameter ``D = 2r``:
 Re = \frac{\rho_f \, \dot V \, D}{\mu_f} = \frac{2 r \, \rho_f \, \dot V}{\mu_f},
 ```
 
-where ``\dot V`` is the **mean fluid speed** in m/s (not the volumetric flow rate), ``r`` the
+where ``\dot{V}`` is the **mean fluid speed** in m/s (not the volumetric flow rate ``V``), ``r`` the
 pipe inner radius, ``\rho_f`` the density and ``\mu_f`` the dynamic viscosity. The same formula
-applies to an annular channel by using its hydraulic radius ``r = r_b - r_o``. See
+applies to an annular pipe system by using its hydraulic radius ``r = r_b - r_o``. See
 `Reynolds`.
 
 ## Prandtl number
@@ -63,7 +63,7 @@ under typical GHE flow conditions — convenient where many evaluations are need
 
 ## Nusselt number — Gnielinski correlation
 
-The Nusselt number ``Nu = h\,D / k_f`` gives the convective coefficient ``h``. The package uses
+The Nusselt number ``Nu = hD / k_f`` gives the convective coefficient ``h``. The package uses
 the Gnielinski framework with explicit handling of the three regimes (Lamarche, 2023):
 
 ```math
@@ -124,4 +124,15 @@ resistance is **per pipe**; the multipole formulas account for the number of pip
 borehole. `resistance_fluid` accepts either a pre-computed ``Nu`` or the raw flow speed
 and properties.
 
+## Functions on this page
 
+```@docs
+Reynolds
+Prandtl
+friction_factor_Colebrook_White
+friction_factor_Tkachenko_Mileikovskyi
+Nusselt
+Nusselt_annulus
+convection_coefficient
+resistance_fluid
+```

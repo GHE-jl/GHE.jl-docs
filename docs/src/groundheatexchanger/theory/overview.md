@@ -22,7 +22,7 @@ adds the resistance drop to recover the fluid temperature.
 The mean fluid temperature at the borehole mid-depth is
 
 ```math
-T_f(t) = T_0 + q(t)\,R_b^* + \frac{(q \star g)(t)}{2\pi k_s},
+T_f(t) = T_0 + q(t)\,R_b^* + (q \star g)(t),
 ```
 
 where
@@ -30,7 +30,8 @@ where
 - ``T_0`` is the undisturbed ground temperature,
 - ``q(t)`` is the heat load per unit borehole length [W/m],
 - ``R_b^*`` is the effective borehole resistance from `BoreholeResistance.jl`,
-- ``g`` is the ground thermal response from `GroundResponse.jl`, and
+- ``g`` [°C·m/W] is the ground thermal response from `GroundResponse.jl` (already normalised by the
+  ground conductivity, so no extra ``1/(2\pi k_s)`` factor is applied here), and
 - ``q \star g`` is the **temporal superposition** (discrete convolution) of the load with the
   response, evaluated by `fluid_temperature`.
 
@@ -65,7 +66,7 @@ Fluid temperature.
 ## A note on g-function compression
 
 A one-year hourly simulation has 8760 time steps; a multi-decade one has many times more. Evaluating
-the analytical g-function at *every* step is the bottleneck. The `ground_response` wrapper in
-this package evaluates the g-function only at a logarithmically spaced subset of time nodes and
-reconstructs the full vector by PCHIP interpolation — transparently, inside the `fluid_temperature`
-overloads that take a ground model. See g-function compression.
+the analytical g-function at *every* step is the bottleneck. `ground_response` (re-exported from
+`GroundResponse.jl`) evaluates the g-function only at a logarithmically spaced subset of time nodes
+and reconstructs the full vector by PCHIP interpolation — transparently, inside the
+`fluid_temperature` overloads that take a ground model. See g-function compression.

@@ -73,6 +73,66 @@ The *integration* layer. It ties resistance and ground response together over a 
 
 → [Documentation](https://GHE-jl.github.io/GroundHeatExchanger.jl)
 
+### GroundHeatExchangerSizing.jl
+
+The *sizing* layer. Given ground thermal loads, it finds the borehole length that keeps the
+heat-pump fluid temperature within its operating limits, at three levels of load-resolution detail
+(L2 three-pulse, L3 monthly, L4 hourly):
+
+- the **alternative ASHRAE sizing equation** (Ahmadfard & Bernier, 2018, 2019), which removes the
+  temperature-penalty term by evaluating the finite-line-source *g*-function for the actual
+  borefield directly, solved by fixed-point iteration;
+- **borehole-outlet transfer-function sizing** (Dion & Pasquier, 2025), which replaces the
+  borehole-wall *g*-function with a dimensionless transfer function defined at the borehole outlet,
+  solved by a bounded one-dimensional optimisation ([Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl)'s `Brent` method).
+
+It builds on `GroundHeatExchanger.jl` (and therefore transitively on `GroundResponse.jl` and
+`BoreholeResistance.jl`) and sizes on **ground** loads. Converting a building load to a ground load
+through the heat pump's COP is the job of `GroundSourceHeatPumpDesign.jl` — see the note on `Q_COP`
+below.
+
+→ [Documentation](https://GHE-jl.github.io/GroundHeatExchangerSizing.jl)
+
+### ThermalResponseTest.jl
+
+The *interpretation* layer, working in the opposite direction from the packages above: instead of
+predicting fluid temperature from known ground properties, it infers the ground thermal
+conductivity ``k_s``, the effective borehole resistance ``R_b^*``, and (with the moving ground
+models) the groundwater Darcy velocity ``v_D``, from a measured thermal response test (TRT) log.
+Two complementary interpretation families are provided:
+
+- **first-order approximation (FOA)** — fast closed-form regressions built on the infinite line
+  source (Pasquier, 2018), with heating and recovery variants using either the temperature itself
+  or its time derivative;
+- **model inversion** — bounded least-squares fitting of a full ground-response model (any of the
+  `GroundResponse.jl` models, static or moving) to the entire measured signal, using
+  [Optimization.jl](https://github.com/SciML/Optimization.jl).
+
+It depends on `GroundHeatExchanger.jl` for the `GroundResponse.jl` ground models and the
+`convolution` temporal-superposition routine that both the model inversions and the package's
+synthetic-TRT tests are built on.
+
+→ [Documentation](https://GHE-jl.github.io/ThermalResponseTest.jl)
+
+### GroundSourceHeatPumpDesign.jl *(early / in development)*
+
+The *heat pump* layer, a standalone sibling of `GroundHeatExchangerSizing.jl` and
+`ThermalResponseTest.jl` rather than a package built on top of them, it does not depend on either.
+Today it provides heat pump performance interpolation (`heat_pump_performance`, 1D/2D on
+source/load entering fluid temperature) and building-to-ground load conversion (`Q_COP`,
+`ground_load_from_heat_pump`). Its public API may change without notice.
+
+!!! note "`Q_COP` also exists in `GroundHeatExchangerSizing.jl`"
+    Both packages provide their own `Q_COP`, with identical logic. This is intentional: the two
+    packages are independent by design, so each carries the small building-to-ground load
+    conversion helper it needs rather than depending on the other for it. Loading both together in
+    the same session would still hit a Julia export collision on the shared name, so use one or the
+    other's `Q_COP` qualified (`GroundHeatExchangerSizing.Q_COP`) if you ever need both packages at
+    once.
+
+→ [Repository](https://github.com/GHE-jl/GroundSourceHeatPumpDesign.jl) (documentation not yet
+published)
+
 ## Shared conventions
 
 The packages agree on units and notation so values pass between them without surprises:

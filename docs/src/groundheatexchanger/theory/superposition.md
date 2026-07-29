@@ -74,4 +74,15 @@ state_vec     = state_vector(ind, state, length(t))
 The result is the same temperature response as the stationary `convolution`, but with the correct
 g-function applied over each interval of constant operating conditions.
 
+## Functions on this page
 
+```@docs
+convolution
+convolutionf
+impulse_func
+convolution_ns!
+convolution_ns
+impulse_func_ns
+state_vector
+state_indices
+```

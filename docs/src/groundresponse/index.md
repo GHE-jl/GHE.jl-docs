@@ -5,8 +5,7 @@
 `GroundResponse.jl` evaluates the **ground thermal response**, or *g*-function, that links a heat
 load injected into the ground to the resulting temperature rise at the borehole wall. It is the
 **transient-ground layer** of a geothermal simulation stack: it provides the response of the soil
-*outside* the borehole, where [`BoreholeResistance.jl`](https://github.com/GHE-jl/BoreholeResistance.jl)
-stops.
+*outside* the borehole, where [`BoreholeResistance.jl`](https://github.com/GHE-jl/BoreholeResistance.jl) stops.
 
 The package implements five analytical models, each available both as a **raw function** and as an
 `AbstractGroundModel` **type** for the high-level interface:
@@ -19,6 +18,7 @@ The package implements five analytical models, each available both as a **raw fu
 | Moving infinite line source | `mils` | `MILSModel` | groundwater advection |
 | Moving finite line source | `mfls` | `MFLSModel` | groundwater advection + finite depth |
 
+\TODO Update this to include all the spatial superposition.
 On top of the single-borehole models, two **spatial-superposition** methods —
 `successive_flux` and `bloc_matrix` — assemble the response of an arbitrary
 **borehole field**, and a family of `borefield` helpers generate common field layouts.
@@ -36,11 +36,11 @@ already folded in, so that for a constant load ``q`` [W/m] applied since ``t = 0
 rise at the borehole wall is simply
 
 ```math
-\Delta T_b(t) = q\, g(t).
+\Delta T_b(t) = q g(t).
 ```
 
 Downstream packages convolve this response with a time-varying load to obtain the full
-borehole-wall temperature history — see Ecosystem.
+borehole-wall temperature history, see Ecosystem.
 
 ## Installation
 

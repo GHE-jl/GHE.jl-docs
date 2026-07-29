@@ -73,6 +73,17 @@ makedocs(;
             ],
             "References" => "groundheatexchangersizing/references.md",
         ],
+        "ThermalResponseTest.jl" => [
+            "Overview" => "thermalresponsetest/index.md",
+            "Tutorial" => "thermalresponsetest/tutorial.md",
+            "Data & utilities" => "thermalresponsetest/data_utilities.md",
+            "Interpretation theory" => [
+                "Overview" => "thermalresponsetest/theory/overview.md",
+                "First-order approximation" => "thermalresponsetest/theory/first_order_approximation.md",
+                "Model inversion" => "thermalresponsetest/theory/model_inversion.md",
+            ],
+            "References" => "thermalresponsetest/references.md",
+        ],
     ],
 )
 

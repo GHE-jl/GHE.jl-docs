@@ -18,10 +18,18 @@ Pkg.add(url = "https://github.com/GHE-jl/GroundHeatExchanger.jl")
 You can also add just the layer you need — `GroundResponse.jl` (ground models only) or
 `BoreholeResistance.jl` (borehole resistance only) — each works standalone.
 
+Two further packages sit downstream of `GroundHeatExchanger.jl` and are installed the same way,
+add whichever layer your work needs:
+
+```julia
+Pkg.add(url = "https://github.com/GHE-jl/GroundHeatExchangerSizing.jl")  # borehole-length sizing
+Pkg.add(url = "https://github.com/GHE-jl/ThermalResponseTest.jl")       # TRT interpretation
+```
+
 ### Developing locally
 
-If you are working on the packages, clone the three repositories **side by side** and develop them
-as local path dependencies:
+If you are working on the packages, clone the repositories you need **side by side** and develop
+them as local path dependencies. For the core three:
 
 ```julia
 using Pkg
@@ -32,7 +40,9 @@ Pkg.instantiate()
 ```
 
 `GroundHeatExchanger.jl` declares the other two as path `[sources]`, so developing it picks up the
-matching local checkouts.
+matching local checkouts. `GroundHeatExchangerSizing.jl` and `ThermalResponseTest.jl` do the same
+for their own direct dependencies — clone them alongside the packages above and `Pkg.develop` them
+the same way.
 
 ## Your first simulation
 
@@ -85,5 +95,7 @@ Each package ships a full manual with a tutorial, the modeling theory, and an AP
 - [BoreholeResistance.jl](https://GHE-jl.github.io/BoreholeResistance.jl) — resistances and water properties
 - [GroundResponse.jl](https://GHE-jl.github.io/GroundResponse.jl) — ground models and borefields
 - [GroundHeatExchanger.jl](https://GHE-jl.github.io/GroundHeatExchanger.jl) — simulation and temporal superposition
+- [GroundHeatExchangerSizing.jl](https://GHE-jl.github.io/GroundHeatExchangerSizing.jl) — borehole-length sizing
+- [ThermalResponseTest.jl](https://GHE-jl.github.io/ThermalResponseTest.jl) — thermal response test interpretation
 
 Every package also includes runnable, plotted validation scripts under its `script/` directory.

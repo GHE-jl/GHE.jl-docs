@@ -33,9 +33,27 @@ conventions and re-export one another, so you can reach for exactly the layer yo
     <td><a href="https://GHE-jl.github.io/GroundHeatExchanger.jl">docs</a> ·
         <a href="https://github.com/GHE-jl/GroundHeatExchanger.jl">repo</a></td>
   </tr>
+  <tr>
+    <td><b>GroundHeatExchangerSizing.jl</b></td>
+    <td>Sizing layer: borehole length from ground thermal loads, via the alternative ASHRAE
+        equation or borehole-outlet transfer-function sizing, at three load-resolution levels.</td>
+    <td><a href="https://GHE-jl.github.io/GroundHeatExchangerSizing.jl">docs</a> ·
+        <a href="https://github.com/GHE-jl/GroundHeatExchangerSizing.jl">repo</a></td>
+  </tr>
+  <tr>
+    <td><b>ThermalResponseTest.jl</b></td>
+    <td>Interpretation layer: infers ground conductivity and effective borehole resistance from a
+        measured thermal response test, via first-order approximation or full model inversion.</td>
+    <td><a href="https://GHE-jl.github.io/ThermalResponseTest.jl">docs</a> ·
+        <a href="https://github.com/GHE-jl/ThermalResponseTest.jl">repo</a></td>
+  </tr>
   </tbody>
 </table>
 ```
+
+`GroundSourceHeatPumpDesign.jl`, the heat pump layer — a standalone sibling of the sizing and
+interpretation packages above, not built on top of them — is early / in development. See
+[Ecosystem](ecosystem.md) for its current scope.
 
 ## How the pieces fit
 
@@ -91,9 +109,13 @@ Tin  = inlet_temperature(Tf, Q, V, Cf)
 - Jump straight into a package's own manual:
   [BoreholeResistance.jl](https://GHE-jl.github.io/BoreholeResistance.jl) ·
   [GroundResponse.jl](https://GHE-jl.github.io/GroundResponse.jl) ·
-  [GroundHeatExchanger.jl](https://GHE-jl.github.io/GroundHeatExchanger.jl).
+  [GroundHeatExchanger.jl](https://GHE-jl.github.io/GroundHeatExchanger.jl) ·
+  [GroundHeatExchangerSizing.jl](https://GHE-jl.github.io/GroundHeatExchangerSizing.jl) ·
+  [ThermalResponseTest.jl](https://GHE-jl.github.io/ThermalResponseTest.jl).
 
 !!! note "Project status"
-    These packages are under active development and not yet registered in the Julia General
-    registry. The three packages above are documented and usable today; install them directly from
-    their GitHub repositories (see [Getting started](@ref)).
+    These packages are under active development. None are registered in the Julia General registry
+    yet; `BoreholeResistance.jl` is the first one being prepared for registration. Until then,
+    install any of them directly from their GitHub repositories (see [Getting started](@ref)).
+    `GroundSourceHeatPumpDesign.jl` is an early, in-development sixth package — see
+    [Ecosystem](ecosystem.md).

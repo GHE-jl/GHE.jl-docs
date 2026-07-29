@@ -23,15 +23,13 @@ GroundResponse.jl          BoreholeResistance.jl
                      ↓
           GroundHeatExchanger.jl
                      │
-         ┌───────────┼───────────┐
-         ↓           ↓           ↓
-  ThermalResponse  GHESizing  (other tools)
-  Test.jl          .jl
-         │           │
-         └─────┬─────┘
-               ↓
-  GroundSourceHeatPumpDesign.jl
+        ┌────────────┼──────────────────────────┐
+        ↓            ↓                           ↓
+ThermalResponseTest.jl  GroundHeatExchangerSizing.jl  GroundSourceHeatPumpDesign.jl
 ```
+
+`ThermalResponseTest.jl`, `GroundHeatExchangerSizing.jl` and `GroundSourceHeatPumpDesign.jl` are
+independent siblings — none of the three depends on either of the other two.
 
 ## Compared to other tools
 
@@ -54,15 +52,15 @@ sensitivity analysis, design-space sweeps).
 
 ## Getting started
 
-Install the full ecosystem:
+None of the packages are registered in the Julia General registry yet (`BoreholeResistance.jl` is
+the first one being prepared for registration), so install directly from GitHub:
+
 ```julia
 using Pkg
-Pkg.add("GroundSourceHeatPumpDesign")
+Pkg.add(url = "https://github.com/GHE-jl/GroundResponse.jl")        # ground models only
+Pkg.add(url = "https://github.com/GHE-jl/BoreholeResistance.jl")    # borehole resistance only
+Pkg.add(url = "https://github.com/GHE-jl/GroundHeatExchanger.jl")   # full GHE simulation
 ```
 
-Or install individual packages:
-```julia
-Pkg.add("GroundResponse")        # ground models only
-Pkg.add("BoreholeResistance")    # borehole resistance only
-Pkg.add("GroundHeatExchanger")   # full GHE simulation
-```
+See [Getting started](https://GHE-jl.github.io/GHE.jl-docs/getting_started) for the sizing and
+thermal-response-test packages, and for the local-development workflow.

@@ -17,7 +17,7 @@ exchanger under a time-varying load.
               ↘                                  ↙
                    GroundHeatExchanger.jl
    temporal superposition (FFT) · fluid_temperature · outlet/inlet_temperature
-   ground_response wrapper (PCHIP compression) · ground_load_profile · head loss
+   pchip_interpolation · ground_load_profile
 ```
 
 A single `using GroundHeatExchanger` re-exports the whole ecosystem, so the entire pipeline — water
@@ -33,12 +33,18 @@ On top of the two upstream packages, `GroundHeatExchanger.jl` provides:
   (`convolution_ns`) for time-varying operating conditions.
 - **Fluid temperatures** — `fluid_temperature`, `outlet_temperature` and
   `inlet_temperature` from the load, resistance and g-function.
-- **g-function compression** — a `ground_response` wrapper that evaluates the (expensive)
-  g-function on a logarithmic node subset and reconstructs the full time vector with PCHIP
-  interpolation.
-- **Utilities** — a synthetic annual `ground_load_profile`, a Darcy–Weisbach
-  `head_loss_Darcy_Weisbach` for pump sizing, and a `GHE` parameter set for the
-  examples.
+- **Short-term outlet ANN** — `short_term_response` / `short_term_nodes`, artificial
+  neural networks that emulate a combined borehole + ground short-term response, joined to any
+  long-term ground model by `outlet_transfer_function`. Two trained networks are available
+  through the `DeepANN` / `PublishedANN` model tag: the wider-range
+  `DeepANN` (Pasquier & Marcotte, 2020) is the **default**; the original 2018 network of
+  Pasquier, Zarrella & Labib remains available as an explicit, citable `PublishedANN`
+  choice.
+- **g-function compression helper** — `pchip_interpolation` for reconstructing an expensive
+  signal from a node subset with shape-preserving PCHIP interpolation (the same kind of compression
+  `ground_response` applies internally via `interp`).
+- **Utilities** — a synthetic annual `ground_load_profile` and a `GHE` parameter set
+  for the examples.
 
 ## Installation
 
@@ -81,7 +87,7 @@ model = FLSModel(H, D, ks, Cs)
 Q     = ground_load_profile(t ./ 3600)      # [W], sinusoidal annual profile
 
 # Full simulation — g-function computed and PCHIP-compressed automatically
-Tf   = fluid_temperature(t, Q ./ H, model, rb, T0, ks, Rb)
+Tf   = fluid_temperature(t, Q ./ H, model, rb, T0, Rb)
 Tout = outlet_temperature(Tf, Q, V, Cf)
 Tin  = inlet_temperature(Tf, Q, V, Cf)
 ```
@@ -128,8 +134,8 @@ documentation lives in their own sites:
 | From | Re-exported symbols | Documentation |
 |---|---|---|
 | **BoreholeResistance.jl** | `water_k`/`cp`/`ρ`/`μ`, `Reynolds`, `Prandtl`, `Nusselt`, `resistance_*` | [docs](https://GHE-jl.github.io/BoreholeResistance.jl) |
-| **GroundResponse.jl** | `ILSModel` … `MFLSModel`, `ils` … `mfls`, `successive_flux`, `bloc_matrix`, `borefield*` | [docs](https://GHE-jl.github.io/GroundResponse.jl) |
+| **GroundResponse.jl** | `ILSModel` … `MFLSModel`, `ils` … `mfls`, `ground_response`, `successive_flux`, `bloc_matrix`, `borefield*` | [docs](https://GHE-jl.github.io/GroundResponse.jl) |
 
-The pages here document only the symbols **defined in** `GroundHeatExchanger.jl`. Note that this
-package defines its own `ground_response` wrapper (adding PCHIP compression) on top of
-`GroundResponse.ground_response`.
+The pages here document only the symbols **defined in** `GroundHeatExchanger.jl`. The g-function
+interface `ground_response` is re-exported from `GroundResponse.jl` (its PCHIP compression is
+toggled by the `interp` keyword) and documented in that package's site.

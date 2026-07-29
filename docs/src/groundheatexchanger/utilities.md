@@ -1,7 +1,7 @@
 # Utilities
 
 Beyond the simulation core, `GroundHeatExchanger.jl` ships a few helpers used throughout the
-examples and for hydraulic (pump) sizing.
+examples.
 
 ## Synthetic load profile
 
@@ -18,26 +18,6 @@ Q = ground_load_profile(t ./ 3600)        # [W]
 All seven shape parameters (amplitude, phase, harmonics, …) have sensible defaults; override them to
 change the amplitude or the heating/cooling balance.
 
-## Head loss for pump sizing
-
-`head_loss_Darcy_Weisbach` returns the **hydraulic head loss** of a pipe segment from the
-Darcy–Weisbach equation:
-
-```math
-\Delta h = f \, \frac{L}{2r} \, \frac{\dot V^2}{2g},
-```
-
-with ``L`` the pipe length, ``r`` the inner radius, ``\dot V`` the mean fluid speed, ``g = 9.81``
-m/s², and ``f`` the Darcy friction factor — which you obtain from the re-exported
-`friction_factor_Colebrook_White` or `friction_factor_Tkachenko_Mileikovskyi` of
-`BoreholeResistance.jl`:
-
-```julia
-V̇ = V / (π * ri^2)                              # mean fluid speed [m/s]
-f = friction_factor_Colebrook_White(Reynolds(V̇, ri, ρf, μf), ri, 1e-5)
-Δh = head_loss_Darcy_Weisbach(2H, ri, V̇, f)     # down + up the borehole
-```
-
 ## Example parameter set
 
 `GHE` returns a complete, named tuple of typical geometry, ground, grout, pipe and fluid
@@ -45,7 +25,12 @@ properties used by the package's validation scripts. It is a convenience for rep
 examples without re-typing two dozen parameters:
 
 ```julia
-t, H, D, s, rb, ro, ri, T0, ks, kg, kp, kf, Cs, Cg, Cp, Cf, ρs, ρg, ρp, ρf, μf, ϵ, vD, V = GHE()
+t, H, D, s, rb, ro, ri, T0, ks, kg, kp, kf, Cs, Cg, Cp, Cf, ρs, ρg, ρp, ρf, μf, vD, V = GHE()
 ```
 
+## Functions on this page
 
+```@docs
+ground_load_profile
+GHE
+```

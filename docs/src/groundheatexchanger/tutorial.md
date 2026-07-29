@@ -45,10 +45,10 @@ Q     = ground_load_profile(t ./ 3600)      # [W]
 geometry and the resistance — the g-function is computed and PCHIP-compressed automatically:
 
 ```julia
-Tf = fluid_temperature(t, Q ./ H, model, rb, T0, ks, Rb)
+Tf = fluid_temperature(t, Q ./ H, model, rb, T0, Rb)
 ```
 
-Under the hood this evaluates ``T_f = T_0 + q\,R_b^* + (q \star g)/(2\pi k_s)`` — see
+Under the hood this evaluates ``T_f = T_0 + q\,R_b^* + (q \star g)`` — see
 Simulation pipeline.
 
 ## 5. Outlet and inlet temperatures
@@ -70,16 +70,16 @@ spatial superposition is applied inside `ground_response`:
 
 ```julia
 xy = borefield(:rectangle, 3, 4, 6.0)     # 3×4 grid, 6 m spacing
-Tf = fluid_temperature(t, Q ./ (H * size(xy, 1)), model, rb, xy, T0, ks, Rb)
+Tf = fluid_temperature(t, Q ./ (H * size(xy, 1)), model, rb, xy, T0, Rb)
 ```
 
 ## 7. Controlling g-function compression
 
-The `n_nodes` keyword controls the PCHIP node subset. The default (150) is accurate for most cases;
-set `n_nodes=0` to evaluate the g-function exactly at every step (slower, for reference):
+The `interp` keyword controls PCHIP compression. The default (`true`) is accurate for most cases;
+set `interp=false` to evaluate the g-function exactly at every step (slower, for reference):
 
 ```julia
-Tf_exact = fluid_temperature(t, Q ./ H, model, rb, T0, ks, Rb; n_nodes=0)
+Tf_exact = fluid_temperature(t, Q ./ H, model, rb, T0, Rb; interp=false)
 ```
 
 See g-function compression.
@@ -114,7 +114,8 @@ julia --project=script/ "script/script_temperature simulation.jl"
 | Script | What it shows |
 |---|---|
 | `script_temperature simulation.jl` | Full pipeline: FLS g → ``R_b^*`` → ``T_f`` / ``T_{in}`` / ``T_{out}``, 1-year hourly. |
-| `script_interpolation.jl` | PCHIP compression accuracy on the ILS model. |
 | `script_temporal_superposition_stationary.jl` | FFT convolution with an FLS g-function over a 6-day load. |
-| `script_temporal_superposition_nonstationary.jl` | Non-stationary convolution across four operating states. |
-| `script_head_loss.jl` | Pipe head loss for pump sizing via Darcy–Weisbach. |
+| `script_temporal_superposition_nonstationary.jl` | Non-stationary convolution across three operating states. |
+| `script_outlet_transfer_function.jl` | Short- + long-term outlet transfer function: Pasquier et al. (2018) Figs. 2a/3, plus a `PublishedANN` vs `DeepANN` borefield comparison. |
+| `script_ann_validation.jl` | `PublishedANN` and `DeepANN` plotted against their MATLAB references at native nodes, with the interpolated `short_term_response` overlaid. |
+| `script_validation_Lamarche2023.jl` | `@test`-based validation of g-functions, resistances and fluid properties against Lamarche's textbook examples. |
