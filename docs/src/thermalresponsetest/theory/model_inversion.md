@@ -15,11 +15,12 @@ superposition forward model from Overview:
 ```
 
 `Rbₑ` is always appended as the last decision variable. The model-specific unknowns `p` (e.g. `k`
-for the ILS, `[k, vD]` for the moving models) come from `model`. Guessed parameters have initial values `p0`, and bounds `lb` and `ub`
-**without** `Rbₑ`, whose own initial guess (0.1 m·K/W) and bounds (`[0.0, 0.5]`) are fixed
-internally. #TODO retype this paragraph. It is unclear.
+for the ILS, `[k, vD]` for the moving models) come from `model`. Guessed parameters have initial
+values `p0`, and bounds `lb` and `ub` **without** `Rbₑ`, whose own initial guess (0.1 m·K/W) and
+bounds (`[0.0, 0.5]`) are fixed internally.
 
-The convolution `q ∗ gₚ` is evaluated through `GroundHeatExchanger.jl`'s fluid_response() (#TODO confirm, the convolution is in GroundHeatExchanger.jl, not in GroundResponse.jl). So, a borefield (`xy` with more than one row), a
+The ground g-function `gₚ` is evaluated with `GroundResponse.jl`'s `ground_response`, and the
+convolution `q ∗ gₚ` with `GroundHeatExchanger.jl`'s `fluid_temperature`. So, a borefield (`xy` with more than one row), a
 custom `AbstractGroundModel`, or any of `ground_response`'s `bc`/`solver`/`interp` options are all
 reachable through `fit_ground_response`'s keywords without new fitting code.
 

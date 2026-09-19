@@ -26,7 +26,9 @@ On top of the single-borehole models, two **spatial-superposition** methods —
 The package depends only on
 [`SpecialFunctions.jl`](https://github.com/JuliaMath/SpecialFunctions.jl),
 [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl),
-[`DSP.jl`](https://github.com/JuliaDSP/DSP.jl) and the `LinearAlgebra` standard library.
+[`DSP.jl`](https://github.com/JuliaDSP/DSP.jl),
+[`PCHIPInterpolation.jl`](https://github.com/gerlero/PCHIPInterpolation.jl) and the
+`LinearAlgebra` standard library.
 
 ## What a g-function is
 
@@ -44,17 +46,17 @@ borehole-wall temperature history, see Ecosystem.
 
 ## Installation
 
-The package is not yet registered. Install it directly from the repository:
+The package is registered in the Julia General registry:
 
 ```julia
 using Pkg
-Pkg.add(url = "https://github.com/GHE-jl/GroundResponse.jl")
+Pkg.add("GroundResponse")
 ```
 
 or, in the Pkg REPL mode (press `]`):
 
 ```
-pkg> add https://github.com/GHE-jl/GroundResponse.jl
+pkg> add GroundResponse
 ```
 
 ## Quick start

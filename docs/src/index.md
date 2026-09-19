@@ -1,6 +1,6 @@
 # GHE.jl
 
-*A composable Julia ecosystem for modelling vertical ground heat exchangers — from borehole
+*A composable Julia ecosystem for modelling vertical ground heat exchangers, from borehole
 thermal resistance to ground response to full fluid-temperature simulation.*
 
 GHE.jl is a family of small, focused Julia packages for the thermal analysis of
@@ -14,8 +14,9 @@ conventions and re-export one another, so you can reach for exactly the layer yo
   <tbody>
   <tr>
     <td><b>BoreholeResistance.jl</b></td>
-    <td>Water properties and the fluid-to-ground thermal resistance network inside the borehole
-        (multipole method, fluid convection, pipe conduction, effective resistance).</td>
+    <td>Fluid properties (water and antifreeze mixtures, via CoolProp) and the fluid-to-ground
+        thermal resistance network inside the borehole (multipole method, fluid convection, pipe
+        conduction, effective resistance).</td>
     <td><a href="https://GHE-jl.github.io/BoreholeResistance.jl">docs</a> ·
         <a href="https://github.com/GHE-jl/BoreholeResistance.jl">repo</a></td>
   </tr>
@@ -47,13 +48,26 @@ conventions and re-export one another, so you can reach for exactly the layer yo
     <td><a href="https://GHE-jl.github.io/ThermalResponseTest.jl">docs</a> ·
         <a href="https://github.com/GHE-jl/ThermalResponseTest.jl">repo</a></td>
   </tr>
+  <tr>
+    <td><b>ThermalResponseDeconvolution.jl</b></td>
+    <td>Model-free interpretation layer: recovers a borehole outlet thermal response function
+        directly from paired fluid-temperature and heat-load data by constrained, regularized
+        deconvolution, without assuming a ground model.</td>
+    <td><a href="https://GHE-jl.github.io/ThermalResponseDeconvolution.jl">docs</a> ·
+        <a href="https://github.com/GHE-jl/ThermalResponseDeconvolution.jl">repo</a></td>
+  </tr>
+  <tr>
+    <td><b>GroundSourceHeatPumpDesign.jl</b> <i>(early / in development)</i></td>
+    <td>Heat pump layer: performance interpolation and building-to-ground load conversion. A
+        standalone sibling of the sizing and interpretation packages, not built on top of them.</td>
+    <td><a href="https://github.com/GHE-jl/GroundSourceHeatPumpDesign.jl">repo</a>
+        (docs not yet published)</td>
+  </tr>
   </tbody>
 </table>
 ```
 
-`GroundSourceHeatPumpDesign.jl`, the heat pump layer — a standalone sibling of the sizing and
-interpretation packages above, not built on top of them — is early / in development. See
-[Ecosystem](ecosystem.md) for its current scope.
+See [Ecosystem](ecosystem.md) for `GroundSourceHeatPumpDesign.jl`'s current scope.
 
 ## How the pieces fit
 
@@ -70,7 +84,7 @@ per package:
                    (temporal superposition, FFT convolution)
 ```
 
-- **BoreholeResistance.jl** answers *how big is the temperature drop across the grout and pipes?*
+- **BoreholeResistance.jl** answers *how large is the temperature drop across the grout and pipes?*
 - **GroundResponse.jl** answers *how does the surrounding ground warm up under a unit load?*
 - **GroundHeatExchanger.jl** convolves a time-varying load with the ground response and adds the
   resistance drop to produce the fluid temperatures an engineer actually designs against.
@@ -78,24 +92,24 @@ per package:
 Because `GroundHeatExchanger.jl` re-exports the other two, a single `using GroundHeatExchanger`
 gives you the entire stack.
 
-## A taste
+## A quick example
 
 ```julia
 using GroundHeatExchanger          # pulls in BoreholeResistance + GroundResponse
 
 H, D, rb, s, ro, ri = 150.0, 2.0, 0.08, 0.05, 0.022, 0.017
-ks, Cs, kg, kp      = 3.0, 2.11e6, 1.6, 0.4
-T0, V               = 10.0, 30/6e4
+ks, Cs, kg, kp = 3.0, 2.11e6, 1.6, 0.4
+T0, V = 10.0, 30/6e4
 t = collect(3600.0:3600:3600*24*365)              # 1 year, hourly
 
-kf = water_k(T0); cf = water_cp(T0); ρf = water_ρ(T0); μf = water_μ(T0)
+kf, cf, ρf, μf = fluid_property(T0, :water)
 Cf = cf * ρf
 
-Rb    = resistance_ULoop_effective(V, H, s, rb, ro, ri, ks, kg, kp, kf, cf, ρf, μf)
+Rb = resistance_ULoop_effective(V, H, s, rb, ro, ri, ks, kg, kp, kf, cf, ρf, μf)
 model = FLSModel(H, D, ks, Cs)
-Q     = ground_load_profile(t ./ 3600)
+Q = ground_load_profile(t ./ 3600)
 
-Tf   = fluid_temperature(t, Q ./ H, model, rb, T0, ks, Rb)
+Tf = fluid_temperature(t, Q ./ H, model, rb, T0, ks, Rb)
 Tout = outlet_temperature(Tf, Q, V, Cf)
 Tin  = inlet_temperature(Tf, Q, V, Cf)
 ```
@@ -111,11 +125,13 @@ Tin  = inlet_temperature(Tf, Q, V, Cf)
   [GroundResponse.jl](https://GHE-jl.github.io/GroundResponse.jl) ·
   [GroundHeatExchanger.jl](https://GHE-jl.github.io/GroundHeatExchanger.jl) ·
   [GroundHeatExchangerSizing.jl](https://GHE-jl.github.io/GroundHeatExchangerSizing.jl) ·
-  [ThermalResponseTest.jl](https://GHE-jl.github.io/ThermalResponseTest.jl).
+  [ThermalResponseTest.jl](https://GHE-jl.github.io/ThermalResponseTest.jl) ·
+  [ThermalResponseDeconvolution.jl](https://GHE-jl.github.io/ThermalResponseDeconvolution.jl).
 
 !!! note "Project status"
-    These packages are under active development. None are registered in the Julia General registry
-    yet; `BoreholeResistance.jl` is the first one being prepared for registration. Until then,
-    install any of them directly from their GitHub repositories (see [Getting started](@ref)).
-    `GroundSourceHeatPumpDesign.jl` is an early, in-development sixth package — see
-    [Ecosystem](ecosystem.md).
+    These packages are under active development. `BoreholeResistance.jl`, `GroundResponse.jl`,
+    `GroundHeatExchanger.jl`, `GroundHeatExchangerSizing.jl`, `ThermalResponseTest.jl` and
+    `ThermalResponseDeconvolution.jl` are all registered in the Julia General registry
+    (`Pkg.add("PackageName")` works for each). `GroundSourceHeatPumpDesign.jl` is an early,
+    in-development seventh package, not yet registered (see [Ecosystem](ecosystem.md) and
+    [Getting started](@ref)) for how to install it from GitHub in the meantime.

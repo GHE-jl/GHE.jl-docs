@@ -12,7 +12,7 @@ Design (GLD), EED, GshpCalc, GHE Analysis, TRT Analysis, sit outside that scope 
 
 | Tool | Language | License | Scope |
 |---|---|---|---|
-| **GHE.jl ecosystem** | Julia | GPL-3.0 | Modular: resistance, *g*-functions, simulation, sizing, thermal response test interpretation as separate packages |
+| **GHE.jl ecosystem** | Julia | AGPL-3.0 | Modular: resistance, *g*-functions, simulation, sizing, thermal response test interpretation as separate packages |
 | [pygfunction](https://github.com/MassimoCimmino/pygfunction) | Python | BSD-3-Clause | Monolithic: *g*-functions, borehole resistance (multipole), load aggregation, fluid temperatures |
 | [GHEtool](https://github.com/wouterpeere/GHEtool) | Python | BSD-3-Clause (Community edition) | Borefield sizing and ground-temperature evolution, built on pygfunction |
 | [GHEDesigner](https://github.com/BETSRG/GHEDesigner) | Python | BSD-3-Clause | Automated borefield sizing and layout optimization, built on pygfunction |
@@ -92,7 +92,7 @@ design point rather than the evaluation of a closed-form expression.
 
 None of this is a claim that GHE.jl is strictly *better*, pygfunction and its downstream tools
 have years of production use, a larger user base, and (for GHEtool) a commercial support offering. Fimbul.jl can model geology no *g*-function-based tool touches at all. The
-ecosystem is younger, and licensed GPL-3.0 rather than the permissive BSD-3-Clause/MIT terms used
+ecosystem is younger, and licensed AGPL-3.0 rather than the permissive BSD-3-Clause/MIT terms used
 by every other project. What it does differently where it *is* a fit:
 
 - **Modular definition of the core components of a GHE.** Every other *g*-function-based tool in the

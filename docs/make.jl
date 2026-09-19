@@ -35,7 +35,7 @@ makedocs(;
                 "Borehole (grout) resistance" => "boreholeresistance/theory/borehole.md",
                 "Effective resistance" => "boreholeresistance/theory/effective.md",
             ],
-            "Water properties" => "boreholeresistance/properties.md",
+            "Fluid properties" => "boreholeresistance/properties.md",
             "References" => "boreholeresistance/references.md",
         ],
         "GroundResponse.jl" => [
@@ -83,6 +83,12 @@ makedocs(;
                 "Model inversion" => "thermalresponsetest/theory/model_inversion.md",
             ],
             "References" => "thermalresponsetest/references.md",
+        ],
+        "ThermalResponseDeconvolution.jl" => [
+            "Overview" => "thermalresponsedeconvolution/index.md",
+            "Tutorial" => "thermalresponsedeconvolution/tutorial.md",
+            "Modeling theory" => "thermalresponsedeconvolution/theory.md",
+            "References" => "thermalresponsedeconvolution/references.md",
         ],
     ],
 )

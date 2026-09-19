@@ -13,10 +13,12 @@ transfer between the circulating fluid and the ground in a vertical
 - the **effective borehole resistance** ``R_b^*`` that accounts for axial thermal
   short-circuiting along the borehole depth,
 
-together with temperature-dependent thermophysical properties of water.
+together with temperature-dependent thermophysical properties of water and antifreeze mixtures
+(via CoolProp).
 
-The package has **no external dependencies** — everything is implemented with the Julia
-standard library — and supports **single U-tube**, **double U-tube** and **coaxial** configurations.
+Besides [CoolProp](https://github.com/CoolProp/CoolProp.jl) for the fluid properties, the package
+has no external dependencies, and supports **single U-tube**, **double U-tube** and **coaxial**
+configurations.
 
 ## Why borehole resistance matters
 
@@ -33,17 +35,17 @@ performance. This package provides the resistances; downstream packages use them
 
 ## Installation
 
-The package is not yet registered. Install it directly from the repository:
+The package is registered in the Julia General registry:
 
 ```julia
 using Pkg
-Pkg.add(url = "https://github.com/GHE-jl/BoreholeResistance.jl")
+Pkg.add("BoreholeResistance")
 ```
 
 or, in the Pkg REPL mode (press `]`):
 
 ```
-pkg> add https://github.com/GHE-jl/BoreholeResistance.jl
+pkg> add BoreholeResistance
 ```
 
 ## Quick start
@@ -53,7 +55,7 @@ using BoreholeResistance
 
 # Fluid properties of water at 10 °C
 T0 = 10.0
-kf = water_k(T0);  cf = water_cp(T0);  ρf = water_ρ(T0);  μf = water_μ(T0)
+kf, cf, ρf, μf = fluid_property(T0, :water)
 
 # Geometry [m] and material conductivities [W/m·K]
 H, s, rb, ro, ri = 150.0, 0.05, 0.08, 0.022, 0.017
@@ -76,7 +78,8 @@ Rb = resistance_ULoop_effective(V, H, s, rb, ro, ri, ks, kg, kp, kf, cf, ρf, μ
     and the two-resistance network for the coaxial configuration.
   - Effective resistance — ``R_b^*`` and thermal short-circuiting, for U-tubes and for
     the coaxial configuration.
-- **Water properties** — the polynomial correlations and their validity range.
+- **Fluid properties** — `fluid_property` (water and antifreeze mixtures via CoolProp) and the
+  legacy polynomial correlations.
 - **API reference** — the complete docstring reference for every exported function.
 - **References** — the bibliography underpinning the implementation.
 
@@ -99,8 +102,8 @@ Rb = resistance_ULoop_effective(V, H, s, rb, ro, ri, ks, kg, kp, kf, cf, ρf, μ
 | ``r_{ii}, r_{io}, r_{oi}, r_{oo}`` | Coaxial inner/outer radii of the inner and outer pipe | m |
 
 !!! note "Heat-capacity convention"
-    `water_cp(T)` returns the **mass-specific** heat ``c_f`` [J/kg·K]. The resistance functions
-    take ``c_f`` and ``\rho_f`` separately. The **volumetric** specific heat
+    `fluid_property` returns the **mass-specific** heat ``c_f`` [J/kg·K] as its second output. The
+    resistance functions take ``c_f`` and ``\rho_f`` separately. The **volumetric** specific heat
     ``C_f = c_f \rho_f`` [J/m³·K] is what downstream moving-source models in the ecosystem
     consume, convert explicitly when crossing that boundary.
 
@@ -110,7 +113,7 @@ Rb = resistance_ULoop_effective(V, H, s, rb, ro, ri, ks, kg, kp, kf, cf, ρf, μ
 
 | Package | Role |
 |---|---|
-| **BoreholeResistance.jl** | Water properties + borehole thermal resistances (this package). |
+| **BoreholeResistance.jl** | Fluid properties + borehole thermal resistances (this package). |
 | **GroundResponse.jl** | Ground *g*-function models and spatial superposition. |
 | **GroundHeatExchanger.jl** | Simulation orchestration; depends on and re-exports both. |
 

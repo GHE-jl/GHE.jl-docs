@@ -17,7 +17,7 @@ GroundResponse.jl          BoreholeResistance.jl
         |                           |                                   |
 ThermalResponseTest.jl    GroundHeatExchangerSizing.jl    GroundSourceHeatPumpDesign.jl
         ↓
-(ThermalResponseDeconvolution.jl)
+ThermalResponseDeconvolution.jl
 ```
 
 `GroundResponse.jl` and `BoreholeResistance.jl` are independent leaves, neither depends on the
@@ -31,7 +31,8 @@ downstream code only needs to import the integration package.
 The *inside-the-borehole* layer. It computes the steady-state thermal resistances along the path
 from the circulating fluid to the borehole wall:
 
-- temperature-dependent **water properties** (`water_k`, `water_cp`, `water_ρ`, `water_μ`);
+- temperature-dependent **fluid properties** (`fluid_property`, for water and antifreeze mixtures
+  via CoolProp; the standalone `water_k`, `water_cp`, `water_ρ`, `water_μ` are deprecated);
 - the **fluid convective resistance** via the Gnielinski correlation
   (`Reynolds`, `Prandtl`, `Nusselt`, friction factors, `resistance_fluid`);
 - the **pipe wall conductive resistance** (`resistance_pipe`);
@@ -114,6 +115,34 @@ synthetic-TRT tests are built on.
 
 → [Documentation](https://GHE-jl.github.io/ThermalResponseTest.jl)
 
+### ThermalResponseDeconvolution.jl
+
+The *model-free interpretation* layer, downstream of a thermal response test (TRT) or ground
+source heat pump (GSHP) operating record in the same way as `ThermalResponseTest.jl`, but without
+fitting a physical ground model. Given paired inlet/outlet fluid temperature and heat-load data at
+a constant time step, it recovers the borehole outlet thermal response function itself, by solving
+a constrained multi-objective optimization problem:
+
+- a **non-circular FFT convolution** (`convolution`) between a load and a response function, used
+  both to build the deconvolution inputs and to validate a recovered response function;
+- **deconvolution** (`deconvolution`) of the response function from measured temperature and load,
+  posed as a weighted temperature-misfit plus first-/second-derivative regularization, solved with
+  [Optimization.jl](https://github.com/SciML/Optimization.jl) via NLopt's SLSQP algorithm;
+- a reduced, log-spaced **node parameterization** of the response function (`set_nodes`) that keeps
+  the optimization tractable on long records, interpolated with
+  [PCHIPInterpolation.jl](https://github.com/gerlero/PCHIPInterpolation.jl);
+- a small **root-mean-square** helper (`rms`) used throughout for reporting fit residuals.
+
+`ThermalResponseDeconvolution.jl` is not a Julia package dependency of `GroundHeatExchanger.jl`
+(or vice versa): its `[deps]` lists neither `GroundHeatExchanger.jl`, `BoreholeResistance.jl` nor
+`GroundResponse.jl`. The relationship in the diagram above is conceptual and data-flow only: it
+consumes the same `T_in`/`T_out`/load data shape that a TRT or a GSHP produces, and its
+`convolution` independently reimplements the same non-circular FFT convolution as
+`GroundHeatExchanger.jl`'s internal `convolutionf`, so the two packages can validate against one
+another without either depending on the other.
+
+→ [Documentation](https://GHE-jl.github.io/ThermalResponseDeconvolution.jl)
+
 ### GroundSourceHeatPumpDesign.jl *(early / in development)*
 
 The *heat pump* layer, a standalone sibling of `GroundHeatExchangerSizing.jl` and
@@ -149,12 +178,11 @@ The packages agree on units and notation so values pass between them without sur
     `BoreholeResistance.jl` works with the **mass-specific** heat ``c_f`` [J/kg·K] (and density
     ``\rho_f`` separately), while the inlet/outlet routines in `GroundHeatExchanger.jl` need the
     **volumetric** specific heat ``C_f = c_f\,\rho_f`` [J/m³·K]. Convert explicitly —
-    `Cf = water_cp(T) * water_ρ(T)` — when crossing that boundary. Each package's documentation
-    flags this at the relevant functions.
+    `Cf = cf * ρf`, with `cf, ρf` from `fluid_property(T, :water)` — when crossing that boundary.
+    Each package's documentation flags this at the relevant functions.
 
 ## Extensibility
 
-`GroundResponse.jl` exposes `AbstractGroundModel` as an extension point: subtype it and add
-`successive_flux` / `bloc_matrix` methods and a new ground model becomes usable everywhere
-`ground_response` is — including inside `GroundHeatExchanger.jl`'s simulation, without changes to
-either package.
+`GroundResponse.jl` exposes `AbstractGroundModel` as an extension point: subtype it and add one
+`_borehole_response` method and a new ground model becomes usable everywhere `ground_response` is, 
+including inside `GroundHeatExchanger.jl`'s simulation, without changes to either package.
