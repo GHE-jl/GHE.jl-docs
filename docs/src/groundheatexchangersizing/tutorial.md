@@ -48,9 +48,9 @@ profile.
 
 The peak duration (`tp`, default 6 h) and the design period (`ny`, default 10 years) are keywords.
 
-For `alternative_sizing`, `Tlim_at` sets where `Tlim` applies, from the ground perspective (not the heat
-pump): `:inlet` (ground inlet = heat-pump LFT, default as it is the most conservative), `:outlet` (ground
-outlet = heat-pump EFT) or `:mean` (mean fluid temperature).
+For both `alternative_sizing` and `outlet_sizing`, `Tlim_at` sets where `Tlim` applies, from the
+ground perspective (not the heat pump): `:inlet` (ground inlet = heat-pump LFT, default as it is the
+most conservative), `:outlet` (ground outlet = heat-pump EFT) or `:mean` (mean fluid temperature).
 
 You can also call a level directly with pre-resampled loads. Use `alternative_sizing_L2`, `_L3` or
 `_L4` (and the `outlet_sizing_*` equivalents). The load-resampling helpers

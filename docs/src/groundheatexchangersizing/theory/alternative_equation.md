@@ -53,11 +53,10 @@ thermal-capacity term, so it is recomputed at every candidate length.
 For each operating limit the length satisfies ``T = T_\text{lim}`` (the peak fluid temperature for
 **L2**, the extremum of the hourly series for L3 and L4). ``T`` is the fluid temperature at the
 location chosen by the `Tlim_at` keyword, seen from the **ground**, not the heat pump as the ground
-inlet (`:inlet`, the heat-pump LFT, default and the most
-conservative), the ground outlet (`:outlet`, the heat-pump
-EFT) or the mean fluid temperature ``T_f`` (`:mean`). The equation is solved by a fixed-point
-iteration. The iteration starts from an initial length and computes a new length from the
-closed-form expression above. It repeats until the length stops changing by more than 0.01 m or a
-maximum iteration count is reached. The g-function is recomputed at each iterate because it depends
-on the length. The governing design, the value returned, is the longer of the low and high limit
-lengths.
+inlet (`:inlet`, the heat-pump LFT, default and the most conservative), the ground outlet
+(`:outlet`, the heat-pump EFT) or the mean fluid temperature ``T_f`` (`:mean`). The equation is
+solved by a fixed-point iteration. The iteration starts from an initial length and computes a new
+length from the closed-form expression above. It repeats until the length stops changing by more
+than 0.01 m or a maximum iteration count is reached. The g-function is recomputed at each iterate
+because it depends on the length. The governing design, the value returned, is the longer of the low
+and high limit lengths.
