@@ -52,7 +52,7 @@ The *outside-the-borehole* layer. It evaluates analytical ground thermal respons
   (`ics`/`ICSModel`), finite line source (`fls`/`FLSModel`), and the moving variants for
   groundwater advection (`mils`/`MILSModel`, `mfls`/`MFLSModel`);
 - a single high-level entry point (`ground_response`) dispatching over model and field size;
-- **spatial superposition** for borehole fields (`successive_flux`, `bloc_matrix`);
+- **spatial superposition** for borehole fields (`bc_I`, `bc_II`, `bc_III`);
 - a family of **borefield layout** generators (`borefield`, `borefield_rectangle`, …).
 
 It is designed as a computational backbone: it returns uninterpolated responses at arbitrary times

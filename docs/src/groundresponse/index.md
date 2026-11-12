@@ -18,16 +18,17 @@ The package implements five analytical models, each available both as a **raw fu
 | Moving infinite line source | `mils` | `MILSModel` | groundwater advection |
 | Moving finite line source | `mfls` | `MFLSModel` | groundwater advection + finite depth |
 
-\TODO Update this to include all the spatial superposition.
-On top of the single-borehole models, two **spatial-superposition** methods —
-`successive_flux` and `bloc_matrix` — assemble the response of an arbitrary
-**borehole field**, and a family of `borefield` helpers generate common field layouts.
+On top of the single-borehole models, **spatial superposition** assembles the response of an
+arbitrary **borehole field** under three boundary conditions — `bc_I` (same flux on every
+borehole), `bc_II` (equal mean wall temperature) and `bc_III` (uniform wall
+temperature with segments) — the last two solved directly by time marching. A family of
+`borefield` helpers generates common field layouts, rotated if needed.
 
 The package depends only on
 [`SpecialFunctions.jl`](https://github.com/JuliaMath/SpecialFunctions.jl),
 [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl),
-[`DSP.jl`](https://github.com/JuliaDSP/DSP.jl),
-[`PCHIPInterpolation.jl`](https://github.com/gerlero/PCHIPInterpolation.jl) and the
+[`PCHIPInterpolation.jl`](https://github.com/gerlero/PCHIPInterpolation.jl),
+[`DSP.jl`](https://github.com/JuliaDSP/DSP.jl) (for the legacy successive-flux solver) and the
 `LinearAlgebra` standard library.
 
 ## What a g-function is

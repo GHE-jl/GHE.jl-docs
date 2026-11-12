@@ -2,8 +2,8 @@
 
 Spatial superposition needs the coordinates of every borehole in the field. This page documents the
 layout generators that produce those coordinates and the `borefield_geometry` helper that
-turns them into the pairwise distance and angle matrices consumed by `successive_flux` and
-`bloc_matrix`.
+turns them into the pairwise distance and angle matrices consumed by `bc_I`, `bc_II`
+and `bc_III`.
 
 ## Coordinate convention
 
